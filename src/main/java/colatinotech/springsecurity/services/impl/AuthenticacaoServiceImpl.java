@@ -65,7 +65,7 @@ public class AuthenticacaoServiceImpl implements AutenticacaoService {
             Algorithm algorithm = Algorithm.HMAC256(secret);
 
             return JWT.require(algorithm)
-                    .withIssuer("securityapi") //com essa aplicação
+                    .withIssuer("springsecurity") //com essa aplicação
                     .build().verify(token)//verifica o token
                     .getSubject();//pega o usuário
         }catch (JWTVerificationException e){
