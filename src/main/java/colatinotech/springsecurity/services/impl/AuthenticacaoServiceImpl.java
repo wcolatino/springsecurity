@@ -7,6 +7,7 @@ import colatinotech.springsecurity.services.AutenticacaoService;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -24,6 +25,8 @@ public class AuthenticacaoServiceImpl implements AutenticacaoService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    String secret = "my-secret";
+
     /**/
     @Override
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
@@ -40,7 +43,7 @@ public class AuthenticacaoServiceImpl implements AutenticacaoService {
 
         try {
             //Algoritmo da geração do Token
-            Algorithm algorithm = Algorithm.HMAC256("my-secret"); //chave secret é como se fosse a chave do Token;
+            Algorithm algorithm = Algorithm.HMAC256(secret); //chave secret é como se fosse a chave do Token;
 
             return JWT.create()
                     .withIssuer("springsecurity") //nome da aplicação
@@ -51,6 +54,22 @@ public class AuthenticacaoServiceImpl implements AutenticacaoService {
         }catch (JWTCreationException e){
             e.getCause();
             throw new RuntimeException("Erro ao tentar gerar o token "+e.getMessage());
+        }
+
+    }
+
+    /*Método para validar se o token é valido para a aplicação*/
+    public String validaTokenJwt(String token){
+
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+
+            return JWT.require(algorithm)
+                    .withIssuer("securityapi") //com essa aplicação
+                    .build().verify(token)//verifica o token
+                    .getSubject();//pega o usuário
+        }catch (JWTVerificationException e){
+            return ""; //Retorna vazio, ou seja, a não valização do token;
         }
 
     }
